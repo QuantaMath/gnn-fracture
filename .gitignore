@@ -1,0 +1,9 @@
+data/*
+/gnn_fractional/pycache/*
+/gnn_fractional/pycache/
+/gnn_fractional/generation/pycache/*
+/gnn_fractional/generation/pycache/
+/gnn_fractional/learning/pycache/*
+/gnn_fractional/learning/pycache/
+/gnn_fractional/optimizationpycache/*
+/gnn_fractional/optimizationpycache/
