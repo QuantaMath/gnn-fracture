@@ -6,7 +6,7 @@ import numpy as np
 import scipy.spatial as sp
 import matplotlib.pyplot as plt
 sys.path.append('../generation')
-from voronoiUtilities import *
+from ..generation.voronoiUtilities import *
 
 class Voronoi:
 

@@ -4,73 +4,45 @@ import torch
 import random
 import argparse
 import numpy as np
-from voronoi import Voronoi
+from .voronoi import Voronoi
 from joblib import Parallel, delayed
 
 sys.path.append('../generation')
-from voronoiUtilities import *
+from ..generation.voronoiUtilities import *
 sys.path.append('../learning')
-from model import *
-from utilities_gru import getNotchEdges
-from utilities_gru import updateQuantitiesForNextStepPrediction
+from ..learning.model import *
+from ..learning.utilities_gru import getNotchEdges
+from ..learning.utilities_gru import updateQuantitiesForNextStepPrediction
 
-def run():
-
-    # Parser options
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--Nx', type=int, default=13)
-    parser.add_argument('--Ny', type=int, default=13)
-    parser.add_argument('--shape', type=str, default='hex')
-    parser.add_argument('--notch_width', type=int, default=4)
-    parser.add_argument('--num_nodes', type=int, default=162)
-    parser.add_argument('--normalize_input', type=int, default=1) 
-    parser.add_argument('--encoder', type=str, default='GraphConv')
-    parser.add_argument('--decoder', type=str, default='InnerProduct')
-    parser.add_argument('--coor_dim', type=int, default=2) 
-    parser.add_argument('--edge_dim', type=int, default=3) 
-    parser.add_argument('--node_dim', type=int, default=9)
-    parser.add_argument('--hidden_dim', type=int, default=256)
-    parser.add_argument('--gnn_layers', type=int, default=6)
-    parser.add_argument('--latent_dim', type=int, default=32)
-    parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--device', type=str, default='cpu') 
-    parser.add_argument('--model_name', type=str, default='gru')
-    parser.add_argument('--seed', type=int, default=1)
-    parser.add_argument('--dt', type=float, default=4.0)
-    parser.add_argument('--lamdaZ0', type=float, default=40.)
-    parser.add_argument('--lamdaGeom0', type=float, default=100.)
-    parser.add_argument('--opt_iter0', type=int, default=0)
-    parser.add_argument('--opt_iters', type=int, default=10)
-    parser.add_argument('--n_cores', type=int, default=40)
-    parser.add_argument('--n_samples', type=int, default=2000)
-    parser.add_argument('--opt_name', type=str, default='glob-0')
-    args = parser.parse_args()
-
-    # Training/Hyperparameters
-    Nx = args.Nx
-    Ny = args.Ny
-    shape = args.shape
-    notch_width = args.notch_width
-    normalize = args.normalize_input
-    num_nodes = args.num_nodes
-    coor_dim = args.coor_dim
-    edge_dim = args.edge_dim
-    node_dim = args.node_dim
-    hidden_dim = args.hidden_dim
-    gnn_layers = args.gnn_layers
-    latent_dim = args.latent_dim
-    dropout = args.dropout
-    device = args.device
-    model_name = args.model_name
-    lamdaZ0 = args.lamdaZ0
-    lamdaGeom0 = args.lamdaGeom0
-    opt_iter0 = args.opt_iter0
-    opt_iters = args.opt_iters
-    n_cores = args.n_cores
-    n_samples = args.n_samples
-    opt_name = args.opt_name
-    seed = args.seed
-    dt = args.dt
+def run(
+    Nx : int = 13,
+    Ny : int = 13,
+    shape : str = 'hex',
+    notch_width : int = 4,
+    num_nodes : int = 162,
+    normalize_input : int = 1,
+    encoder : str = 'GraphConv',
+    decoder : str = 'InnerProduct',
+    coor_dim : int = 2 ,
+    edge_dim : int = 3 ,
+    node_dim : int = 9,
+    hidden_dim : int = 256,
+    gnn_layers : int = 6,
+    latent_dim : int = 32,
+    dropout : float = 0.0,
+    device : str = 'cpu' ,
+    model_name : str = 'gru',
+    seed : int = 1,
+    dt : float = 4.0,
+    lamdaZ0 : float = 40.,
+    lamdaGeom0 : float = 100.,
+    opt_iter0 : int = 0,
+    opt_iters : int = 10,
+    n_cores : int = 40,
+    n_samples : int = 2000,
+    opt_name : str = 'glob-0',
+):
+ 
 
     # Seed
     random.seed(seed)
@@ -78,11 +50,11 @@ def run():
     torch.manual_seed(seed)
 
     # The trained model we use for evaluation
-    loadName = '../learning/output/' + model_name
+    loadName = 'output/' + model_name
 
     # Read data normalizers 
-    if normalize:
-        rootDir = '../data/'
+    if normalize_input:
+        rootDir = 'data/'
         dataDirGDual = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-G-dual/'
         x_bounds = np.loadtxt(dataDirGDual + 'x_normalization.dat') 
         r_bounds = np.loadtxt(dataDirGDual + 'r_normalization.dat')
@@ -95,13 +67,13 @@ def run():
     batch = torch.tensor(batch, device=device, dtype=torch.int64)
         
     # Define encoder
-    if args.encoder == 'GraphConvGRU':
+    if encoder == 'GraphConvGRU':
         encoder = GraphConvGRU(node_dim, hidden_dim, latent_dim, edge_dim, gnn_layers, dropout, batch)
     else:
         sys.exit('Unknown encoder type')
 
     # Define decoder
-    if args.decoder == 'InnerProduct':
+    if decoder == 'InnerProduct':
         decoder = InnerProductDecoder(batch_size=1)
     else:
         sys.exit('Unknown decoder type')
@@ -141,7 +113,7 @@ def run():
             A0, x0, r, M = voronoi.getDualGraphAndFeatures(notch_width)
 
             # Normalize
-            if args.normalize_input:
+            if normalize_input:
                 # Unpack        
                 x_min,x_max = x_bounds
                 r_x_min,r_x_max = r_bounds[0]
@@ -244,6 +216,3 @@ def run():
             f.write(str(round(lamda[0],4)) + ', ')
             f.write(str(round(lamda[1],4)) + '\n')
         f.close() 
-
-if __name__ == '__main__':
-    run()

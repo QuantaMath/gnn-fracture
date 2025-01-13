@@ -2,75 +2,45 @@ import sys
 import time
 import torch
 import random
-import argparse
 import numpy as np
-from model import *
-from utilities_gru import *
+from .model import *
+from .utilities_gru import *
 from torch_geometric.data import Data, DataLoader
 
-def run():
-    # Parser options
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--Nx', type=int, default=13)
-    parser.add_argument('--Ny', type=int, default=13)
-    parser.add_argument('--shape', type=str, default='hex')
-    parser.add_argument('--Ndata', type=int, default=60000)
-    parser.add_argument('--num_nodes', type=int, default=162)
-    parser.add_argument('--notch_width', type=int, default=4)
-    parser.add_argument('--epochs', type=int, default=20)
-    parser.add_argument('--batch_size', type=int, default=20)
-    parser.add_argument('--data_augment', type=int, default=1)
-    parser.add_argument('--normalize_input', type=int, default=1) 
-    parser.add_argument('--test_size', type=float, default=0.1)
-    parser.add_argument('--encoder', type=str, default='GraphConvGRU')
-    parser.add_argument('--decoder', type=str, default='InnerProduct')
-    parser.add_argument('--coor_dim', type=int, default=2) 
-    parser.add_argument('--edge_dim', type=int, default=3) 
-    parser.add_argument('--node_dim', type=int, default=9)
-    parser.add_argument('--hidden_dim', type=int, default=256)
-    parser.add_argument('--gnn_layers', type=int, default=6)
-    parser.add_argument('--latent_dim', type=int, default=32)
-    parser.add_argument('--min_disorder', type=float, default=0.1)
-    parser.add_argument('--max_disorder', type=float, default=1.2)
-    parser.add_argument('--dropout', type=float, default=0.4)
-    parser.add_argument('--learning_rate', type=float, default=5e-5)
-    parser.add_argument('--patience', type=int, default=6) 
-    parser.add_argument('--weight_decay', type=float, default=1e-5)
-    parser.add_argument('--device', type=str, default='cuda') 
-    parser.add_argument('--scheduler', type=str, default='StepLR') 
-    parser.add_argument('--optimizer', type=str, default='Adam')  
-    parser.add_argument('--model_name', type=str, default='gru')
-    args = parser.parse_args()
-
-    # Training/Hyperparameters
-    Nx = args.Nx
-    Ny = args.Ny
-    shape = args.shape
-    Ndata = args.Ndata
-    epochs = args.epochs 
-    num_nodes = args.num_nodes
-    notch_width = args.notch_width
-    batch_size = args.batch_size
-    normalize = args.normalize_input
-    data_augment = args.data_augment
-    test_size = args.test_size
-    coor_dim = args.coor_dim
-    edge_dim = args.edge_dim
-    node_dim = args.node_dim
-    hidden_dim = args.hidden_dim
-    gnn_layers = args.gnn_layers
-    latent_dim = args.latent_dim
-    min_disorder = args.min_disorder
-    max_disorder = args.max_disorder
-    dropout = args.dropout
-    learning_rate = args.learning_rate 
-    device = args.device
-    patience = args.patience
-    weight_decay = args.weight_decay
-    model_name = args.model_name
-
+def run(
+    Nx : int = 13,
+    Ny : int = 13,
+    shape : str = 'hex',
+    Ndata : int = 60000,
+    num_nodes : int = 162,
+    notch_width : int = 4,
+    epochs : int = 20,
+    batch_size : int = 20,
+    data_augment : int = 1,
+    normalize : int = 1, 
+    test_size : float = 0.1,
+    encoder : str = 'GraphConvGRU',
+    decoder : str = 'InnerProduct',
+    coor_dim : int = 2, 
+    edge_dim : int = 3, 
+    node_dim : int = 9,
+    hidden_dim : int = 256,
+    gnn_layers : int = 6,
+    latent_dim : int = 32,
+    min_disorder : float = 0.1,
+    max_disorder : float = 1.2,
+    dropout : float = 0.4,
+    learning_rate : float = 5e-5,
+    patience : int = 6, 
+    weight_decay : float = 1e-5,
+    device : str = 'cuda',
+    scheduler : str = 'StepLR', 
+    optimizer : str = 'Adam',
+    model_name :str = 'gru',
+):
     # Split to train/test data
     random.seed(0)
+
     np.random.seed(0)
     torch.manual_seed(0)
 
@@ -103,13 +73,13 @@ def run():
     num_batches = len(train_loaders[0].dataset)/batch_size
     
     # Define encoder
-    if args.encoder == 'GraphConvGRU':
+    if encoder == 'GraphConvGRU':
         encoder = GraphConvGRU(node_dim, hidden_dim, latent_dim, edge_dim, gnn_layers, dropout, batch)
     else:
         sys.exit('Unknown encoder type')
 
     # Define decoder
-    if args.decoder == 'InnerProduct':
+    if decoder == 'InnerProduct':
         decoder = InnerProductDecoder(batch_size)
     else:
         sys.exit('Unknown decoder type')
@@ -121,14 +91,14 @@ def run():
     graph_model.to(device)
 
     # Define optimizer
-    if args.optimizer == 'Adam':
+    if optimizer == 'Adam':
         optimizer = torch.optim.Adam(graph_model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     torch.autograd.set_detect_anomaly(True)
 
     # Define scheduler
-    if args.scheduler == 'ConstantLR':
+    if scheduler == 'ConstantLR':
         scheduler = torch.optim.lr_scheduler.ConstantLR(optimizer, factor=1.0, total_iters=epochs) 
-    elif args.scheduler == 'StepLR':
+    elif scheduler == 'StepLR':
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.9) 
     else:
         sys.exit('Unknown scheduler option')
@@ -302,6 +272,3 @@ def run():
     # Save loss
     np.savetxt(saveName + '-loss.csv', np.c_[loss_curve, test_loss_curve], 
         delimiter=",", header="Train loss, Test loss")
-
-if __name__ == '__main__':
-    run()

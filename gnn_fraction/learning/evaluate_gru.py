@@ -2,62 +2,37 @@ import sys
 import time
 import torch
 import random
-import argparse
 import numpy as np
-from model import *
-from utilities_gru import *
+from .model import *
+from .utilities_gru import *
 from scipy.linalg import block_diag
 from torch_geometric.data import Data, DataLoader
 from torch_geometric.utils import to_dense_adj
 
-def run():
-    # Parser options
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--Nx', type=int, default=13)
-    parser.add_argument('--Ny', type=int, default=13)
-    parser.add_argument('--shape', type=str, default='hex')
-    parser.add_argument('--Nevals_train', type=int, default=10000)
-    parser.add_argument('--Nevals_test', type=int, default=10000)
-    parser.add_argument('--num_nodes', type=int, default=162)
-    parser.add_argument('--notch_width', type=int, default=4)
-    parser.add_argument('--data_augment', type=int, default=0)
-    parser.add_argument('--normalize_input', type=int, default=1) 
-    parser.add_argument('--encoder', type=str, default='GraphConvGRU')
-    parser.add_argument('--decoder', type=str, default='InnerProduct')
-    parser.add_argument('--coor_dim', type=int, default=2) 
-    parser.add_argument('--edge_dim', type=int, default=3) 
-    parser.add_argument('--node_dim', type=int, default=9)
-    parser.add_argument('--hidden_dim', type=int, default=256)
-    parser.add_argument('--gnn_layers', type=int, default=6)
-    parser.add_argument('--latent_dim', type=int, default=32)
-    parser.add_argument('--min_disorder', type=float, default=0.1)
-    parser.add_argument('--max_disorder', type=float, default=1.2)
-    parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--device', type=str, default='cuda') 
-    parser.add_argument('--model_name', type=str, default='gru')
-    args = parser.parse_args()
-
-    # Training/Hyperparameters
-    Nx = args.Nx
-    Ny = args.Ny
-    shape = args.shape
-    Nevals_train = args.Nevals_train
-    Nevals_test = args.Nevals_test
-    num_nodes = args.num_nodes
-    notch_width = args.notch_width
-    normalize = args.normalize_input
-    data_augment = args.data_augment
-    coor_dim = args.coor_dim
-    edge_dim = args.edge_dim
-    node_dim = args.node_dim
-    hidden_dim = args.hidden_dim
-    gnn_layers = args.gnn_layers
-    latent_dim = args.latent_dim
-    min_disorder = args.min_disorder
-    max_disorder = args.max_disorder
-    dropout = args.dropout
-    device = args.device
-    model_name = args.model_name
+def run(
+    Nx : int = 13,
+    Ny : int = 13,
+    shape : str = 'hex',
+    Nevals_train : int = 10000,
+    Nevals_test : int = 10000,
+    num_nodes : int = 162,
+    notch_width : int = 4,
+    data_augment : int = 0,
+    normalize : int = 1,
+    encoder : str = 'GraphConvGRU',
+    decoder : str = 'InnerProduct',
+    coor_dim : int = 2,
+    edge_dim : int = 3,
+    node_dim : int = 9,
+    hidden_dim : int = 256,
+    gnn_layers : int = 6,
+    latent_dim : int = 32,
+    min_disorder : float = 0.1,
+    max_disorder : float = 1.2,
+    dropout : float = 0.0,
+    device : str = 'cuda',
+    model_name : str = 'gru',
+):
     print(model_name)
 
     # Seed
@@ -94,13 +69,13 @@ def run():
     x_bounds,_ = readNormalization(Nx, Ny, shape)
 
     # Define encoder
-    if args.encoder == 'GraphConvGRU':
+    if encoder == 'GraphConvGRU':
         encoder = GraphConvGRU(node_dim, hidden_dim, latent_dim, edge_dim, gnn_layers, dropout, batch)
     else:
         sys.exit('Unknown encoder type')
 
     # Define decoder
-    if args.decoder == 'InnerProduct':
+    if decoder == 'InnerProduct':
         decoder = InnerProductDecoder(batch_size=1)
     else:
         sys.exit('Unknown decoder type')
@@ -285,6 +260,3 @@ def run():
         f.write('\n') 
     f.close()
     file_test.close()
-
-if __name__ == '__main__':
-    run()

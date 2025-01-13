@@ -14,7 +14,7 @@ def splitTrainTestMeshes(Nx, Ny, shape, Ndata, minDisorder, maxDisorder, test_si
 	Return indices of meshes used for training/testing
 	"""
 	# Directories
-	rootDir = '../data/'
+	rootDir = 'data/'
 	dataDirG = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-G/'
 
 	# Read geometric disorder for each mesh
@@ -39,7 +39,7 @@ def readNormalization(Nx, Ny, shape):
 	Read normalization constants 
 	"""
 	# Directories
-	rootDir = '../data/'
+	rootDir = 'data/'
 	dataDirGDual = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-G-dual/'
 	x_bounds = np.loadtxt(dataDirGDual + 'x_normalization.dat')
 	r_bounds = np.loadtxt(dataDirGDual + 'r_normalization.dat')
@@ -51,7 +51,7 @@ def getMaxSequenceLength(Nx, Ny, shape, train_mesh_idx):
 	maxSequenceLength = 0
 
 	# Data dir
-	rootDir = '../data/'
+	rootDir = 'data/'
 	dataDirTFrac = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-T-frac/'
 
 	for meshIdx in train_mesh_idx:
@@ -68,7 +68,7 @@ def getDataLoaders(Nx, Ny, shape, notchWidth, meshList, normalize, augment, maxS
 	Read data from files and return torch data loader
 	"""
 	# Directories
-	rootDir = '../data/'
+	rootDir = 'data/'
 	dataDirGDual = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-G-dual/'
 	dataDirTFrac = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-T-frac/'
 	dataDirG = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-G/'
@@ -445,7 +445,7 @@ def updateQuantitiesForNextStepPrediction(A0, A, X0, r, X_bounds, broken_edges, 
 def getNotchEdges(Nx, Ny, shape, notchWidth):
 
 	# Data dir
-	rootDir = '../data/'
+	rootDir = 'data/'
 	dataDirGDual = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-G-dual/'
 
 	#=====================
@@ -494,7 +494,7 @@ def getNotchEdges(Nx, Ny, shape, notchWidth):
 
 def readMesh(Nx, Ny, shape, meshIdx):
 	# Data dir
-	rootDir = '../data/'
+	rootDir = 'data/'
 	dataDirGDual = rootDir + str(shape) + '-' + str(Nx) + 'x' + str(Ny) + '-G-dual/'
 	meshStr = dataDirGDual + 'mesh-' + str(meshIdx) + '-dual.dat'
 	nodes = []

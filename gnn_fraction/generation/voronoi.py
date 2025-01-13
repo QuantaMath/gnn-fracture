@@ -4,7 +4,7 @@ import random
 import numpy as np
 import scipy.spatial as sp
 import matplotlib.pyplot as plt
-from voronoiUtilities import *
+from .voronoiUtilities import *
 
 class Voronoi:
 
@@ -125,7 +125,7 @@ class Voronoi:
         '''
         Save nodes and edges for use in downstream FEM 
         '''
-        dataDir = '../data/' + self.shape + '-' + str(self.Nx)+'x'+str(self.Ny)+'-G'
+        dataDir = 'data/' + self.shape + '-' + str(self.Nx)+'x'+str(self.Ny)+'-G'
         f = open(dataDir + '/mesh-' + str(meshIdx) +'.dat','w')
         for node in self.voronoiVerts:
             f.write('%.8f,%.8f\n' % (node[0], node[1])) 
@@ -138,7 +138,7 @@ class Voronoi:
         """
         Append the specific input that generated the mesh to the list of all inputs
         """
-        dataDir = '../data/' + self.shape + '-' + str(self.Nx)+'x'+str(self.Ny) + '-G'
+        dataDir = 'data/' + self.shape + '-' + str(self.Nx)+'x'+str(self.Ny) + '-G'
         filename = dataDir + '/mesh-list.dat'
         if meshIdx == 0:
             f = open(filename, "w")
@@ -166,7 +166,7 @@ class Voronoi:
         Save the graph of the voronoi nodes along with features
         of interest for use in downstream graph learning
         '''
-        dataDir = '../data/' + self.shape + '-' + str(self.Nx)+'x'+str(self.Ny)+'-G-dual'
+        dataDir = 'data/' + self.shape + '-' + str(self.Nx)+'x'+str(self.Ny)+'-G-dual'
         f = open(dataDir + '/mesh-' + str(meshIdx) + '-dual.dat','w')
         for node in self.points:
             f.write('%.4f,%.4f\n' % (node[0], node[1])) 
