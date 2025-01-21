@@ -6,7 +6,7 @@ import numpy as np
 from .model import *
 from .utilities_gru import *
 from torch_geometric.data import Data, DataLoader
-from tqdm.auto import tqdm
+from tqdm.notebook import tqdm
 
 def run(
     Nx : int = 13,
