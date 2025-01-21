@@ -8,6 +8,7 @@ from .utilities_gru import *
 from scipy.linalg import block_diag
 from torch_geometric.data import Data, DataLoader
 from torch_geometric.utils import to_dense_adj
+from tqdm.auto import tqdm
 
 def run(
     Nx : int = 13,
@@ -101,7 +102,7 @@ def run(
         
     # Training
     mesh_idx = 0
-    for data_all_steps in zip(*train_loaders):
+    for data_all_steps in tqdm(zip(*train_loaders)):
         if mesh_idx >= Nevals_train: continue
         start = time.time()
 
