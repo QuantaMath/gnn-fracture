@@ -6,6 +6,7 @@ import numpy as np
 from .model import *
 from .utilities_gru import *
 from torch_geometric.data import Data, DataLoader
+from tqdm.auto import tqdm
 
 def run(
     Nx : int = 13,
@@ -156,7 +157,7 @@ def run(
         return total_loss/data_sets_test
 
     # Main training loop
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
 
         start = time.time()
 
@@ -169,7 +170,7 @@ def run(
 
         # For each batch of meshes
         batch_idx = 0
-        for data_all_steps in zip(*train_loaders):
+        for data_all_steps in tqdm(zip(*train_loaders)):
 
             # loss = 0
             batch_idx += 1
